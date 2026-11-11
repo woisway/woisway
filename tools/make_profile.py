@@ -141,8 +141,21 @@ if __name__ == '__main__':
     if not days:
         sys.exit('no contribution data found')
     os.makedirs(OUT, exist_ok=True)
+    import hashlib
+    digest = hashlib.sha1()
     for n in THEMES:
         p = os.path.join(OUT, f'island-{n}.svg')
+        svg = scene(n, days)
+        digest.update(svg.encode())
         with open(p, 'w') as f:
-            f.write(scene(n, days))
+            f.write(svg)
         print(p, os.path.getsize(p), 'bytes')
+    # the README points at the images with a version tag, so a redrawn banner is never stuck in a browser cache
+    v = digest.hexdigest()[:8]
+    with open(os.path.join(OUT, '..', 'README.md'), 'w') as f:
+        f.write(f'''<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/island-dark.svg?v={v}">
+  <img alt="A floating pixel island whose garden is a year of contributions, next to a dialog box that says hello." src="assets/island-light.svg?v={v}" width="100%">
+</picture>
+''')
+    print('README.md → v', v)
