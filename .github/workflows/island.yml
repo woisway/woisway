@@ -1,37 +1,30 @@
-name: Island day & night
+name: Contribution garden
 
-# 06:00 WIB (sunrise) and 18:00 WIB (sunset): swap the profile between day and night,
-# and redraw the 3D contribution island with the latest contributions.
+# Once a day: replant the garden with the latest contributions (light + dark versions).
 on:
   schedule:
-    - cron: "0 23 * * *"   # 06:00 WIB
-    - cron: "0 11 * * *"   # 18:00 WIB
+    - cron: "0 17 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  island:
+  garden:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
 
-      - name: Draw the 3D contribution island (day + night palettes)
-        uses: yoshi389111/github-profile-3d-contrib@v0.9.3
+      - name: Replant the garden
+        run: python3 tools/make_garden.py
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USERNAME: ${{ github.repository_owner }}
-          SETTING_JSON: .github/island-3d.json
-
-      - name: Day or night on the island
-        run: python3 tools/render_readme.py
+          GH_USER: ${{ github.repository_owner }}
 
       - name: Commit & push
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add -A .
-          if git commit -m "Island: $(TZ=Asia/Jakarta date +'%H:%M WIB')"; then
+          git add assets/garden-light.svg assets/garden-dark.svg
+          if git commit -m "Replant the garden"; then
             git push
           fi
