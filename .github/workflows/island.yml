@@ -1,6 +1,6 @@
-name: Contribution garden
+name: Island banner
 
-# Once a day: replant the garden with the latest contributions (light + dark versions).
+# Once a day: redraw the banner, whose island is the contribution garden (light + dark versions).
 on:
   schedule:
     - cron: "0 17 * * *"
@@ -15,8 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Replant the garden
-        run: python3 tools/make_garden.py
+      - name: Redraw the island
+        run: python3 tools/make_profile.py
         env:
           GH_USER: ${{ github.repository_owner }}
 
@@ -24,7 +24,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add assets/garden-light.svg assets/garden-dark.svg
-          if git commit -m "Replant the garden"; then
+          git add assets/island-light.svg assets/island-dark.svg
+          if git commit -m "Island: replant the garden"; then
             git push
           fi
