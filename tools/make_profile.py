@@ -3,7 +3,7 @@
 
     python3 tools/make_profile.py           → assets/island-light.svg, assets/island-dark.svg
 
-Left: the dialog card (hello + a year of contributions, best day, a less → more legend).
+Left: the dialog card, as on the site. On the island: a wooden sign with the year's contributions and best day.
 Right: a round voxel island with one tile per day of the last year, oldest at the back and today at
 the front (gold flag); busier days grow bigger plants. Sky, sun/moon, clouds and a balloon as on the site.
 The workflow reruns this daily, so the garden keeps growing.
@@ -105,35 +105,33 @@ def scene(name, days):
             b.append(f'<rect x="{652 + i * 6}" y="{40 + j * 6}" width="6" height="6" fill="{col}"/>')
     out.append('<g class="bob">' + ''.join(b) + '</g>')
 
-    # dialog card
-    x0, y0, w, h = 52, 86, 560, 266
+    # wooden sign planted at the front-left of the island: the year's numbers belong to the garden
+    wood, woodDark, ink = ('#a0703f', '#5a3b26', '#fff6d8') if not t['night'] else ('#6e4c2c', '#3a2618', '#f2e6c8')
+    num = str(total)
+    tw = text_width(num, 5) + 14 + max(text_width('CONTRIBUTIONS', 2), text_width(f'BEST DAY {best}', 2))
+    bw, bh = tw + 32, 64
+    sx, sy = 772 - bw // 2, 150
+    out.append(f'<rect x="{sx + bw // 2 - 6}" y="{sy + bh}" width="12" height="34" fill="{woodDark}"/>')       # post
+    out.append(f'<rect x="{sx + 5}" y="{sy + 5}" width="{bw}" height="{bh}" rx="6" fill="{t["shadow"]}" opacity=".35"/>')
+    out.append(f'<rect x="{sx}" y="{sy}" width="{bw}" height="{bh}" rx="6" fill="{wood}" stroke="{woodDark}" stroke-width="4"/>')
+    for k in (1, 2):                                                                                       # plank seams
+        out.append(f'<rect x="{sx + 4}" y="{sy + k * bh // 3}" width="{bw - 8}" height="2" fill="{woodDark}" opacity=".45"/>')
+    for nx, ny in ((sx + 8, sy + 8), (sx + bw - 12, sy + 8), (sx + 8, sy + bh - 12), (sx + bw - 12, sy + bh - 12)):
+        out.append(f'<rect x="{nx}" y="{ny}" width="4" height="4" fill="{woodDark}"/>')                        # nails
+    out.append(pixel_text(num, sx + 16, sy + 15, 5, ink))
+    out.append(pixel_text('CONTRIBUTIONS', sx + 30 + text_width(num, 5), sy + 17, 2, ink))
+    out.append(pixel_text(f'BEST DAY {best}', sx + 30 + text_width(num, 5), sy + 35, 2, ink))
+
+    # dialog card, like the site's hero: just hello
+    x0, y0, w, h = 56, 118, 560, 172
     out.append(f'<rect x="{x0 + 7}" y="{y0 + 7}" width="{w}" height="{h}" rx="14" fill="{t["shadow"]}"/>')
     out.append(f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="{t["panel"]}" stroke="{t["line"]}" stroke-width="4"/>')
     badge = 'WOI · SOFTWARE · DATA · CLOUD'
-    bw = text_width(badge, 2) + 28
-    out.append(f'<rect x="{x0 + 18}" y="{y0 - 18}" width="{bw}" height="34" rx="9" fill="{t["gold"]}" stroke="{t["line"]}" stroke-width="3"/>')
+    bw2 = text_width(badge, 2) + 28
+    out.append(f'<rect x="{x0 + 18}" y="{y0 - 18}" width="{bw2}" height="34" rx="9" fill="{t["gold"]}" stroke="{t["line"]}" stroke-width="3"/>')
     out.append(pixel_text(badge, x0 + 32, y0 - 8, 2, '#1d1b26'))
-    out.append(pixel_text('HELLO, WORLD!', x0 + 34, y0 + 42, 6, t['text']))
-    out.append(pixel_text('WELCOME TO THE ISLAND.', x0 + 36, y0 + 106, 3, t['primary']))
-    # divider, then the garden stats
-    for k in range(0, w - 72, 12):
-        out.append(f'<rect x="{x0 + 36 + k}" y="{y0 + 146}" width="6" height="3" fill="{t["line"]}" opacity=".35"/>')
-    num = str(total)
-    out.append(pixel_text(num, x0 + 36, y0 + 168, 5, t['text']))
-    out.append(pixel_text('CONTRIBUTIONS THIS YEAR', x0 + 48 + text_width(num, 5), y0 + 170, 2, t['primary']))
-    out.append(pixel_text(f'BEST DAY {best}', x0 + 48 + text_width(num, 5), y0 + 190, 2, t['text2']))
-    # legend: what grows on the island
-    ly = y0 + 238
-    out.append(pixel_text('LESS', x0 + 36, ly - 4, 2, t['text2']))
-    for i in range(5):
-        lp = []
-        bx = x0 + 100 + i * 30
-        LP = lambda x, y, z, bx=bx: (bx + (x - z) * 8, ly - 6 + (x + z) * 4 - y * 8)
-        cube(lp, LP, 0, 0, 0, 1, 0.5, t['grass'][0])
-        plant(lp, LP, 0, 0, i, t, random.Random(i))
-        lp.sort(key=lambda p: p[0])
-        out.append(''.join(p[1] for p in lp))
-    out.append(pixel_text('MORE', x0 + 100 + 5 * 30 + 4, ly - 4, 2, t['text2']))
+    out.append(pixel_text('HELLO, WORLD!', x0 + 34, y0 + 46, 6, t['text']))
+    out.append(pixel_text('WELCOME TO THE ISLAND.', x0 + 36, y0 + 114, 3, t['primary']))
     out.append('</svg>')
     return ''.join(out)
 
